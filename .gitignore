@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# User local config, shortcuts, and exported libraries
+config.json
+output/
+*.lnk
+*.IntLib
+*.LibPkg
+*.SchLib
+*.PcbLib
+
+# Scratch / debug scripts
+probe_api.py
+
+# OS files
+Thumbs.db
+.DS_Store
