@@ -63,21 +63,27 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-# Altium Designer "Dark Gray" UI Theme Palette
-BG_WINDOW = "#232325"
-BG_PANEL = "#2D2D30"
-BG_HEADER = "#38383C"
-BG_INPUT = "#1E1E1E"
-BG_ROW_ALT = "#262629"
-BG_BTN = "#3E3E42"
-BG_BTN_HOVER = "#4E4E54"
+# Altium Designer 26 "Altium Dark Gray" UI Theme Palette (pixel-matched neutral charcoal)
+BG_TITLEBAR = "#474747"
+BG_MENUBAR = "#393939"
+BG_MENUBAR_ACTIVE = "#4E4E4E"
+BG_MENUBAR_HOVER = "#4A4A4A"
+BG_WINDOW = "#333333"
+BG_PANEL = "#3B3B3B"
+BG_HEADER = "#4A4A4A"
+BG_STATUSBAR = "#404040"
+BG_INPUT = "#2E2E2E"
+BG_ROW_ALT = "#353535"
+BG_BTN = "#4A4A4A"
+BG_BTN_HOVER = "#5A5A5A"
+BG_BTN_DISABLED = "#454545"
 
-BORDER_PANEL = "#434347"
-BORDER_INPUT = "#4D4D52"
+BORDER_PANEL = "#525252"
+BORDER_INPUT = "#585858"
 
-TEXT_PRIMARY = "#ECECEC"
-TEXT_SECONDARY = "#A6A6AB"
-TEXT_MUTED = "#7A7A80"
+TEXT_PRIMARY = "#EAEAEA"
+TEXT_SECONDARY = "#B4B4B4"
+TEXT_MUTED = "#888888"
 
 ALTIUM_BLUE = "#007ACC"
 ALTIUM_BLUE_HOVER = "#1C97EA"
@@ -492,6 +498,28 @@ class LcscToIntLibApp(ctk.CTk):
                             if hicon_sm:
                                 user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, hicon_sm)
                     self._win_hicons = (hicon_big, hicon_sm)
+                    # Match Windows 11 native title bar tone to Altium Designer 26 (#474747)
+                    try:
+                        dwmapi = ctypes.windll.dwmapi
+                        DWMWA_BORDER_COLOR = 34
+                        DWMWA_CAPTION_COLOR = 35
+                        DWMWA_TEXT_COLOR = 36
+                        # COLORREF is 0x00BBGGRR
+                        caption_color = ctypes.c_int(0x00474747)
+                        text_color = ctypes.c_int(0x00EAEAEA)
+                        border_color = ctypes.c_int(0x00525252)
+                        if hwnd_top:
+                            dwmapi.DwmSetWindowAttribute(
+                                hwnd_top, DWMWA_CAPTION_COLOR, ctypes.byref(caption_color), 4
+                            )
+                            dwmapi.DwmSetWindowAttribute(
+                                hwnd_top, DWMWA_TEXT_COLOR, ctypes.byref(text_color), 4
+                            )
+                            dwmapi.DwmSetWindowAttribute(
+                                hwnd_top, DWMWA_BORDER_COLOR, ctypes.byref(border_color), 4
+                            )
+                    except Exception:
+                        pass
                     return
 
             # Non-Windows fallback: supply multiple sharp resolutions to wm_iconphoto
@@ -544,7 +572,7 @@ class LcscToIntLibApp(ctk.CTk):
         self.grid_rowconfigure(2, weight=1)
 
         # 0. Slim Altium Designer Menu Bar (Search  Integrate  ...  Auto-Clipboard)
-        topbar = ctk.CTkFrame(self, fg_color="#323235", corner_radius=0, height=28)
+        topbar = ctk.CTkFrame(self, fg_color=BG_MENUBAR, corner_radius=0, height=28)
         topbar.grid(row=0, column=0, sticky="ew")
         topbar.grid_propagate(False)
         topbar.grid_columnconfigure(1, weight=1)
@@ -563,8 +591,8 @@ class LcscToIntLibApp(ctk.CTk):
                 height=24,
                 corner_radius=2,
                 fg_color="transparent",
-                hover_color="#45454A",
-                text_color="#C8C8CE",
+                hover_color=BG_MENUBAR_HOVER,
+                text_color="#D0D0D0",
                 font=ctk.CTkFont(family=FONT_UI, size=11),
                 command=lambda k=tab_key: self._switch_tab(k),
             )
@@ -581,9 +609,9 @@ class LcscToIntLibApp(ctk.CTk):
             font=ctk.CTkFont(family=FONT_UI, size=10),
             text_color=TEXT_SECONDARY,
             progress_color=ALTIUM_BLUE,
-            button_color="#D8D8DC",
+            button_color="#DCDCDC",
             button_hover_color="#FFFFFF",
-            fg_color="#525257",
+            fg_color="#5A5A5A",
             switch_width=30,
             switch_height=14,
         ).grid(row=0, column=2, padx=10, sticky="e")
@@ -606,7 +634,7 @@ class LcscToIntLibApp(ctk.CTk):
         self._build_integrate_page(self.integrate_page)
 
         # 3. Bottom Altium Status Strip
-        status_bar = ctk.CTkFrame(self, fg_color=BG_INPUT, corner_radius=0, height=24)
+        status_bar = ctk.CTkFrame(self, fg_color=BG_STATUSBAR, corner_radius=0, height=24)
         status_bar.grid(row=3, column=0, sticky="ew")
         status_bar.grid_propagate(False)
         status_bar.grid_columnconfigure(0, weight=1)
@@ -636,9 +664,9 @@ class LcscToIntLibApp(ctk.CTk):
         self._active_tab = tab_key
         for k, btn in self._tab_btns.items():
             if k == tab_key:
-                btn.configure(fg_color="#48484E", text_color="#FFFFFF")
+                btn.configure(fg_color=BG_MENUBAR_ACTIVE, text_color="#FFFFFF")
             else:
-                btn.configure(fg_color="transparent", text_color="#C8C8CE")
+                btn.configure(fg_color="transparent", text_color="#D0D0D0")
 
         self.search_page.grid_forget()
         self.integrate_page.grid_forget()
@@ -1237,7 +1265,7 @@ class LcscToIntLibApp(ctk.CTk):
             text="Generate Integrated Library  (.LibPkg + .IntLib)",
             height=34,
             corner_radius=2,
-            fg_color="#3A3A3F",
+            fg_color=BG_BTN_DISABLED,
             hover_color=ALTIUM_BLUE_HOVER,
             text_color=TEXT_MUTED,
             font=ctk.CTkFont(family=FONT_UI, size=12, weight="bold"),
@@ -1385,7 +1413,7 @@ class LcscToIntLibApp(ctk.CTk):
         can_gen = bool(valid_items) and not self.is_busy
         self.btn_int_generate.configure(
             state="normal" if can_gen else "disabled",
-            fg_color=ALTIUM_BLUE if can_gen else "#3A3A3F",
+            fg_color=ALTIUM_BLUE if can_gen else BG_BTN_DISABLED,
             text_color="#FFFFFF" if can_gen else TEXT_MUTED,
         )
         if valid_items and not self.is_busy:
@@ -1496,7 +1524,7 @@ class LcscToIntLibApp(ctk.CTk):
 
         out_dir = self.integrate_output_dir
         self._set_busy(True, f"Integrating {len(valid_paths)} libraries into '{custom_name}'...")
-        self.btn_int_generate.configure(state="disabled", fg_color="#3A3A3F", text_color=TEXT_MUTED)
+        self.btn_int_generate.configure(state="disabled", fg_color=BG_BTN_DISABLED, text_color=TEXT_MUTED)
         self.int_progress_bar.configure(progress_color=ALTIUM_BLUE)
         self.int_progress_bar.set(0.02)
         self.int_progress_pct.configure(text="2%", text_color=ALTIUM_BLUE_HOVER)
@@ -1609,7 +1637,7 @@ class LcscToIntLibApp(ctk.CTk):
         can_gen = bool(valid_items)
         self.btn_int_generate.configure(
             state="normal" if can_gen else "disabled",
-            fg_color=ALTIUM_BLUE if can_gen else "#3A3A3F",
+            fg_color=ALTIUM_BLUE if can_gen else BG_BTN_DISABLED,
             text_color="#FFFFFF" if can_gen else TEXT_MUTED,
         )
         self.int_progress_bar.configure(progress_color=STATUS_ERR)
